@@ -17,15 +17,17 @@ about this codebase.
 | Aspect | Status |
 |---|---|
 | Language | Swift 6 with strict concurrency — **to be set in Phase 1** |
-| App shell / UI chrome | SwiftUI |
-| Gameplay surface | SpriteKit via `SpriteView`, hosted in the SwiftUI shell |
+| App shell / UI chrome | SwiftUI *(if the stack stays Swift-native)* |
+| Gameplay surface | **UNDECIDED — blocking.** See `docs/graphics/00-engine-decision.md` |
 | Testing | Swift Testing (unit) + XCUITest (flows) |
 | Deployment target | **Undecided.** Pick the lowest target the feature set truly needs. |
 | Persistence, audio, haptics, Game Center, monetisation | **Not adopted.** See "Adding frameworks". |
 
-The SwiftUI-shell + SpriteKit-gameplay split is a *recommendation* carried over
-from Phase 0, not a ratified decision. Confirm it with the user before scaffolding.
-Do not switch engines without an explicit decision recorded in the repo.
+**The engine is an open, blocking decision.** Phase 1 recommended high-angle 2D
+on SpriteKit; a later graphics directive specified a realistic 3D feature set that
+SpriteKit cannot deliver. Four packages and a recommendation are in
+`docs/graphics/00-engine-decision.md`. Do not scaffold, and do not pick an engine
+implicitly by starting to write code, until this is recorded.
 
 ## Non-negotiable operating principles
 

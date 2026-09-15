@@ -1,5 +1,16 @@
 # Visual direction
 
+> **Style and camera sections are contingent on the engine decision.**
+> This document specifies *hand-authored 2D* per the Phase 1 recommendation. The
+> graphics directive later specified realistic 3D. See
+> `../graphics/00-engine-decision.md`.
+>
+> **What survives either decision:** the colour script, the six Kingston grades,
+> the sodium-versus-LED lighting motif, the lighting-as-storytelling stance, the
+> wet-tarmac signature, the animation principles and the anti-generic checklist.
+> Those are carried forward and extended in `../graphics/03-lighting-architecture.md`
+> and `../graphics/09-kingston-environment-pipeline.md`.
+
 ## The one-line brief
 
 **A British market town at night, seen from above, after rain.**

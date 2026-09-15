@@ -5,14 +5,30 @@ each is the user's call.
 
 ## 1. Engine and camera — **blocking everything**
 
-**Recommendation: high-angle top-down 2D on SpriteKit.**
+> **Reopened and widened by the graphics directive.**
+> Full analysis: `../graphics/00-engine-decision.md`.
 
-SpriteKit is 2D. "Third-person" here means seen-from-above-and-behind, not
-over-the-shoulder 3D. Alternatives (SceneKit, RealityKit, Metal, Unity) mean a
-different technical plan, a 3D art pipeline, and largely discarding the Phase 0
-environment. Rationale in `12-technical-architecture.md`.
+Phase 1 recommended high-angle top-down 2D on SpriteKit. The graphics directive
+then specified a realistic 3D feature set — screen-space effects, PBR materials
+with wet/dry state transitions, volumetric fog, snow accumulation with
+footprints, motion matching, LOD, quality tiers. **SpriteKit is 2D and cannot do
+any of it.** The two cannot both stand.
 
-**Nothing should be built until this is confirmed.**
+Four coherent packages, in `../graphics/00-engine-decision.md`:
+
+- **A — Unity URP**, visual target as written. Recommended if the realistic 3D
+  target is non-negotiable.
+- **B — Metal custom renderer**, target reduced to stylised realism, seasons and
+  snow cut from the slice. Recommended if Swift-native is the real constraint.
+- **C — RealityKit.** Cannot do the specified weather/material systems. Not
+  recommended for this target.
+- **D — SpriteKit 2D** as Phase 1 specified. Most likely to ship; requires
+  abandoning the realistic-3D target.
+
+Note: **SceneKit is eliminated** — Apple soft-deprecated it at WWDC25
+(critical-bug-only maintenance, no new features).
+
+**Nothing should be built until this is recorded.**
 
 ## 2. Art resourcing — **the project's real constraint**
 

@@ -1,5 +1,14 @@
 # Technical architecture
 
+> **SUPERSEDED IN PART — read `../graphics/00-engine-decision.md` first.**
+>
+> A subsequent graphics directive requires a realistic 3D renderer (screen-space
+> effects, PBR materials with wet/dry state, volumetric fog, snow accumulation,
+> motion matching, LOD, quality tiers). **SpriteKit cannot do any of that.**
+> Decision 1 below is therefore reopened, not settled. The module boundaries,
+> the `KingstonCore` purity rule, the concurrency posture and the save decision
+> all still stand and survive the engine change intact.
+
 ## Decision 1 — is SwiftUI + SpriteKit still right?
 
 **Yes, with one condition that must be stated plainly.**
