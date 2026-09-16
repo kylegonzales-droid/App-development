@@ -250,6 +250,116 @@ def time_by_condition(season, seed, total_seconds, step=1.0):
     return totals
 
 
+
+# ---------------------------------------------------------------- missions
+
+THE_FIRST_DAY = [
+    # (beat_id, kind, target, next, state_changes)
+    ("explore_centre",        "GoTo", "town_centre",    "find_river",           []),
+    ("find_river",            "GoTo", "riverside",      "speak_local",          []),
+    ("speak_local",           "Talk", "local_resident", "visit_high_street",    [("met.first_local", 1, True)]),
+    ("visit_high_street",     "GoTo", "high_street",    "return_meeting_point", []),
+    ("return_meeting_point",  "GoTo", "meeting_point",  None,
+     [("mission.the_first_day.complete", 1, True), ("standing.quayside", 5, False)]),
+]
+
+
+class MissionRunner:
+    """Mirrors MissionRunner.cs."""
+
+    def __init__(self, beats):
+        self.beats = {b[0]: b for b in beats}
+        if len(self.beats) != len(beats):
+            raise ValueError("duplicate beat id")
+        for b in beats:
+            if b[3] is not None and b[3] not in self.beats:
+                raise ValueError(f"dangling transition from {b[0]} to {b[3]}")
+        self.first = beats[0][0]
+        self.current = None
+        self.status = "NotStarted"
+        self.world = {}
+        self.completed_events = 0
+
+    def begin(self):
+        self.current = self.first
+        self.status = "Running"
+
+    def _apply(self, beat):
+        for key, value, absolute in beat[4]:
+            self.world[key] = value if absolute else self.world.get(key, 0) + value
+
+    def complete(self):
+        if self.status != "Running" or self.current is None:
+            return
+        beat = self.beats[self.current]
+        self._apply(beat)
+        if beat[3] is None:
+            self.current = None
+            self.status = "Completed"
+            self.completed_events += 1
+        else:
+            self.current = beat[3]
+
+    def try_complete(self, kind, target):
+        if self.status != "Running" or self.current is None:
+            return False
+        beat = self.beats[self.current]
+        if beat[1] != kind or beat[2].lower() != target.lower():
+            return False
+        self.complete()
+        return True
+
+
+def check_missions():
+    print("\nMissions")
+    r = MissionRunner(THE_FIRST_DAY)
+    r.begin()
+    check("begins at the first beat", r.current == "explore_centre")
+
+    check("wrong target does not advance",
+          r.try_complete("GoTo", "riverside") is False and r.current == "explore_centre")
+    check("wrong kind does not advance", r.try_complete("Talk", "town_centre") is False)
+
+    r.try_complete("GoTo", "town_centre")
+    r.try_complete("GoTo", "town_centre")
+    check("repeated trigger does not double-advance", r.current == "find_river")
+
+    r.try_complete("GoTo", "riverside")
+    check("state change not applied early", "met.first_local" not in r.world)
+    r.try_complete("Talk", "local_resident")
+    check("state change applied on completion", r.world.get("met.first_local") == 1)
+
+    r.try_complete("GoTo", "high_street")
+    r.try_complete("GoTo", "meeting_point")
+    check("mission reaches completion", r.status == "Completed")
+    check("completion flag written", r.world.get("mission.the_first_day.complete") == 1)
+    check("standing awarded", r.world.get("standing.quayside") == 5)
+
+    r.complete()
+    check("completion fires exactly once", r.completed_events == 1)
+
+    # graph integrity
+    reached, node = set(), THE_FIRST_DAY[0][0]
+    beats = {b[0]: b for b in THE_FIRST_DAY}
+    while node and node not in reached:
+        reached.add(node)
+        node = beats[node][3]
+    check("every beat is reachable", len(reached) == len(THE_FIRST_DAY),
+          f"reached {len(reached)} of {len(THE_FIRST_DAY)}")
+
+    try:
+        MissionRunner([("a", "GoTo", "x", "nope", [])])
+        check("dangling transition rejected", False)
+    except ValueError:
+        check("dangling transition rejected", True)
+
+    try:
+        MissionRunner([("a", "GoTo", "x", None, []), ("a", "GoTo", "y", None, [])])
+        check("duplicate beat id rejected", False)
+    except ValueError:
+        check("duplicate beat id rejected", True)
+
+
 # ---------------------------------------------------------------- assertions
 
 FAILURES = []
@@ -340,6 +450,8 @@ def main():
     for _ in range(20000):
         sim.advance(1.0)
     check("scripted weather holds", sim.dominant == "Fog", f"got {sim.dominant}")
+
+    check_missions()
 
     print()
     if FAILURES:

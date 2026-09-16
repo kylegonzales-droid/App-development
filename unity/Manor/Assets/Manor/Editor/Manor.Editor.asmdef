@@ -1,0 +1,14 @@
+{
+  "name": "Manor.Editor",
+  "rootNamespace": "Manor.Editor",
+  "references": [ "Manor.Core", "Manor.Game" ],
+  "includePlatforms": [ "Editor" ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
