@@ -25,6 +25,8 @@ requires a 3D renderer. The project is currently specified on SpriteKit, which i
 | [`09-kingston-environment-pipeline.md`](09-kingston-environment-pipeline.md) | Kit-of-parts, street furniture, authoring pipeline, LOD, what Claude can and cannot build |
 | [`10-vertical-slice-graphics-plan.md`](10-vertical-slice-graphics-plan.md) | Phases A–R sequenced, the feel gate, acceptance criteria |
 | [`11-first-prototype.md`](11-first-prototype.md) | **"One Wet Street"** — the first thing to build |
+| [`12-character-pipeline.md`](12-character-pipeline.md) | Character tiers, budgets, skin/eye/hair/cloth shading, import validation |
+| [`13-character-sourcing.md`](13-character-sourcing.md) | Topology and licence checklists for acquiring base meshes |
 
 ## Principles carried through all of them
 

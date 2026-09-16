@@ -95,12 +95,12 @@ Three realistic routes for the art itself, best first:
 | Route | Cost | Quality ceiling | Notes |
 |---|---|---|---|
 | **Licensed base mesh + custom art direction** | Low–medium | High | Buy a well-topologised, rigged base human; re-sculpt, re-texture, re-clothe to our designs. **Recommended** — it skips the hardest and least differentiating work. |
+| **MetaHuman** | Free under $1M/yr | Very high | Epic changed the licence in June 2025: MetaHumans are non-engine products, usable in commercial Unity games with no revenue share. Real integration cost — rig, groom and shaders are Unreal-shaped and need reworking for URP, and mobile perf work is substantial. Evaluate; do not assume. |
 | **Character creation tool** | Low | Medium–high | Fast and consistent; check the licence permits commercial game distribution, and expect a recognisable "look" unless heavily art-directed over. |
 | **Bespoke from scratch** | High | Highest | Only worth it for Remi, and only once the slice has proved the game. |
 
-Whichever route: **verify the licence covers commercial distribution in a shipped
-iOS game** before a single asset enters the repository, and record it in
-`../../.claude/SKILLS-ATTRIBUTION.md` style provenance.
+**Evaluation and licence checklists: [`13-character-sourcing.md`](13-character-sourcing.md).**
+Run them before any asset enters the repository.
 
 ## Import and validation
 
