@@ -1,33 +1,40 @@
 # App-development — iOS Mobile Game
 
-## Current state of this repository — read this first
+## Current state — read this first
 
-**This repository contains no application code.** As of the Phase 0 environment
-setup it held zero commits: no Xcode project, no Swift sources, no assets, no
-tests, no build scripts. Everything under `.claude/` is development tooling, not
-product code.
+**Engine decided: Unity 6 + URP. This is a 3D game, not a 2D game.**
+See `docs/decisions/0001-engine-unity-urp.md`.
 
-Do not describe, summarise, or reason about "the existing game" as if it exists.
-It does not yet. Until real sources land, every statement about architecture,
-deployment target, Swift version, or dependencies is a *proposal*, not a fact
-about this codebase.
+The project has a small amount of real code: `unity/Manor/Assets/Manor/Core/` —
+game clock, surface wetness model, weather simulation — plus 33 NUnit tests.
+There is **no scene, no renderer, no character, no shader, no gameplay** yet.
+
+**Nothing has been compiled or run.** This container has no Unity and no .NET SDK
+(the network policy blocks Microsoft's distribution host). The C# is unverified by
+a compiler. Its *arithmetic* is validated separately — see "Verification" below.
+Never describe the code as working, tested, or building.
 
 ## Target stack (declared, not yet implemented)
 
 | Aspect | Status |
 |---|---|
-| Language | Swift 6 with strict concurrency — **to be set in Phase 1** |
-| App shell / UI chrome | SwiftUI *(if the stack stays Swift-native)* |
-| Gameplay surface | **UNDECIDED — blocking.** See `docs/graphics/00-engine-decision.md` |
-| Testing | Swift Testing (unit) + XCUITest (flows) |
-| Deployment target | **Undecided.** Pick the lowest target the feature set truly needs. |
+| Engine | **Unity 6 (6000.x LTS) + URP**, iOS via Metal |
+| Dimension | **3D.** Third-person. Not 2D — this is explicit and not open for drift. |
+| Language | C# |
+| Game logic | `Manor.Core` — pure C#, `noEngineReferences: true` |
+| Testing | NUnit via the Unity Test Runner |
+| Deployment target | **Undecided.** Lowest that covers the intended device base. |
 | Persistence, audio, haptics, Game Center, monetisation | **Not adopted.** See "Adding frameworks". |
 
-**The engine is an open, blocking decision.** Phase 1 recommended high-angle 2D
-on SpriteKit; a later graphics directive specified a realistic 3D feature set that
-SpriteKit cannot deliver. Four packages and a recommendation are in
-`docs/graphics/00-engine-decision.md`. Do not scaffold, and do not pick an engine
-implicitly by starting to write code, until this is recorded.
+**Swift, SwiftUI and SpriteKit are no longer the stack.** Phase 0 and Phase 1
+assumed them; `docs/decisions/0001-engine-unity-urp.md` supersedes that. The Swift
+and SpriteKit skills under `.claude/skills/` are dormant reference — do not follow
+them for gameplay code, and do not delete them.
+
+**Still live from Phase 0:** `ios-simulator`, `debugging-instruments`,
+`ios-ettrace-performance`, `ios-memgraph-analysis`, `metrickit`,
+`ios-accessibility`, `apple-hig`, `ui-review`, and the TDD skills. Profiling,
+device testing, accessibility and App Store work are unaffected by the engine.
 
 ## Non-negotiable operating principles
 
@@ -52,23 +59,52 @@ These are expanded in `.claude/rules/`, which is imported below and is binding.
 
 ## Adding frameworks
 
-Adopt a framework only when a real, present requirement needs it — never because
-it is idiomatic, available, or listed as a possibility. Frameworks explicitly
-*not* adopted, pending justification: SwiftData, StoreKit 2, Core Haptics,
-AVFoundation, Core Animation (beyond what SwiftUI/SpriteKit use internally),
-Metal, GameplayKit, CloudKit, and any third-party backend.
+Adopt a package only when a real, present requirement needs it — never because it
+is idiomatic, available, or listed as a possibility. This applies to Unity
+packages and Asset Store purchases as much as to frameworks.
+
+**Not adopted, pending justification:** analytics, ads, IAP/monetisation, any
+backend, cloud save, DOTS/ECS, and any third-party rendering or animation package.
+`Packages/manifest.json` is the current agreed set.
+
+**Any third-party asset must have its licence checked for commercial iOS
+distribution before it enters the repository**, and the provenance recorded.
 
 When adopting one, record in the same change: what requires it, what was
 considered instead, and how it is tested.
 
-## Tooling reality check
+## Verification and the tooling reality
 
-The Claude Code session that set this project up ran on **Linux**, where no Swift
-toolchain, Xcode, or Simulator exists. Build, test, and Simulator verification
-require a macOS host with Xcode. If those tools are absent, say so plainly and
-mark the work unverified — never imply a build or test result you did not obtain.
+This container has **no Unity, no .NET SDK, no Xcode, no Simulator**. It runs
+Linux, and the network policy blocks Microsoft's .NET host. Consequences:
+
+- **C# cannot be compiled or run here.** Say so. Never imply otherwise.
+- The NUnit suite requires the Unity Editor. It has not been run.
+- Building for iOS requires a macOS host with Unity and Xcode.
+
+What *can* be verified here: the numeric models, via
+`tools/model-validation/validate_core_model.py`, a Python port of the same
+arithmetic asserting the same properties. **A pass there means the model is
+right, not that the C# compiles.** Keep it in step with the C# or delete it.
+
+Run it after any change to the weather or surface models:
+
+```sh
+python3 tools/model-validation/validate_core_model.py
+```
+
+## Where things are
+
+| Path | Contents |
+|---|---|
+| `unity/Manor/` | The game. See `unity/README.md`. |
+| `docs/decisions/` | ADRs. Start at 0001. |
+| `docs/design/` | World, story, factions, missions, UI *(Swift-era engine sections superseded)* |
+| `docs/graphics/` | Rendering, materials, weather, lighting, VFX, animation, characters, performance |
+| `tools/model-validation/` | Python validation of the core numeric models |
 
 ## Skills
 
 30 skills are installed project-local under `.claude/skills/` and load
 automatically. Provenance and licensing: `.claude/SKILLS-ATTRIBUTION.md`.
+Several are now dormant — see "Target stack" above.

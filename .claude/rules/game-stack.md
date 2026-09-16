@@ -2,45 +2,45 @@
 
 ## Engine posture
 
-The declared target is a 2D mobile game: **SwiftUI for app chrome, SpriteKit for
-the gameplay surface**, bridged with `SpriteView`. This is a recommendation
-pending Phase 1 confirmation, not a ratified decision.
+**Unity 6 + URP. The game is 3D, third-person, iOS via Metal.**
+Decided in `docs/decisions/0001-engine-unity-urp.md`.
 
-Do not change engine direction (to Metal, SceneKit, RealityKit, Unity, or
-anything else) without an explicit decision from the user recorded in the repo.
-If a requirement appears that the current engine genuinely cannot meet, raise it
-as a decision to be made — do not quietly start building against a second engine.
+This is not open for drift. Do not reintroduce SpriteKit, SwiftUI or a 2D camera
+for gameplay. If a requirement appears that Unity genuinely cannot meet, raise it
+as a decision to be made — do not quietly start building against something else.
 
 ## Layering
 
-Keep these separable, whichever engine is confirmed:
-
-- **Game logic** — rules, state machines, progression, scoring. Plain Swift
-  types with no import of SpriteKit, SwiftUI, or UIKit. This layer is where unit
-  tests carry their weight, so it must be testable without a scene or a view.
-- **Presentation** — `SKScene`/`SKNode` subclasses, SwiftUI views, animation,
-  particles, audio triggers. Reads from game logic; does not own the rules.
+- **Game logic** — rules, state machines, progression, scoring, weather and
+  surface state. Lives in `Manor.Core`, whose assembly definition sets
+  `noEngineReferences: true`, so the compiler physically prevents it importing
+  `UnityEngine`. This is where unit tests carry their weight.
+- **Presentation** — MonoBehaviours, renderers, shaders, VFX, animation, camera.
+  Reads from game logic; never owns the rules.
 - **Platform services** — persistence, Game Center, purchases, analytics. Behind
-  narrow protocols so gameplay does not depend on the vendor.
+  narrow interfaces so gameplay does not depend on a vendor.
 
-A value that both the simulation and the renderer need belongs in game logic, not
-duplicated on a node.
+A value both the simulation and the renderer need belongs in `Manor.Core`, not
+duplicated on a component.
+
+**Never add references to `Manor.Core.asmdef`.**
 
 ## The frame budget is a correctness constraint
 
 A premium mobile game holds 60 fps (120 where ProMotion is available). That means
 a ~16.6 ms budget, ~8.3 ms at 120 Hz.
 
-In per-frame code paths (`update(_:)`, `didSimulatePhysics`, contact delegates,
-custom shaders):
+In per-frame code paths (`Update`, `FixedUpdate`, `LateUpdate`, collision
+callbacks, custom shaders):
 
 - No allocation in the steady state. Pool nodes, particles, and buffers.
-- No `String` formatting, no `NSLog`/`print`, no JSON, no disk I/O.
+- No `String` formatting or concatenation, no `Debug.Log`, no JSON, no disk I/O.
 - No forced texture loads. Preload atlases at scene setup.
 - No synchronous work that scales with entity count without a measured bound.
 
-`.claude/skills/swift-memory-performance` covers `InlineArray` and `Span` for
-zero-overhead hot paths. Treat a frame-time regression as a bug, not a polish item.
+Treat a frame-time regression as a bug, not a polish item. Budgets per system are
+in `docs/graphics/01-graphics-and-rendering-architecture.md`; there is no spare
+headroom by design, so a new effect must name the system it takes milliseconds from.
 
 ## Adopting a framework
 
@@ -50,10 +50,12 @@ Before adding any framework or third-party dependency, answer in writing:
 3. What does it cost — binary size, launch time, permissions, review risk?
 4. How is it tested?
 
-Unanswered means not adopted. This applies to SwiftData, StoreKit 2, Core
-Haptics, AVFoundation, Metal, GameplayKit, CloudKit, Firebase and every
-equivalent. Skills for several of these are installed; an installed skill is
-reference material, not permission to adopt.
+Unanswered means not adopted. This applies to Unity packages, Asset Store
+purchases, analytics, ads, IAP, backends and every equivalent. An installed skill
+or an available package is reference material, not permission to adopt.
+
+Any third-party asset must have its licence checked for commercial iOS
+distribution before it enters the repository, and the provenance recorded.
 
 ## Original work only
 
