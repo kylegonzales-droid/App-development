@@ -97,7 +97,10 @@ namespace Manor.Editor
             foreach (var skinned in selected.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 if (skinned.sharedMesh == null) continue;
+
                 var bonesPerVertex = skinned.sharedMesh.GetBonesPerVertex();
+                if (!bonesPerVertex.IsCreated || bonesPerVertex.Length == 0) continue;
+
                 byte worst = 0;
                 for (int i = 0; i < bonesPerVertex.Length; i++)
                 {

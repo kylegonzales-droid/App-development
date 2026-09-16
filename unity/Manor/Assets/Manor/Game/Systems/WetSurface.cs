@@ -15,6 +15,7 @@ namespace Manor.Game.Systems
     {
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int SmoothnessId = Shader.PropertyToID("_Smoothness");
+        private static readonly int GlobalWetnessId = Shader.PropertyToID("_ManorWetness");
 
         [Tooltip("How much this material darkens when wet. Brick high, glass near zero.")]
         [SerializeField, Range(0f, 1f)] private float porosity = 0.75f;
@@ -46,7 +47,7 @@ namespace Manor.Game.Systems
             if (Time.time < _nextUpdate) return;
             _nextUpdate = Time.time + updateInterval;
 
-            float wetness = Shader.GetGlobalFloat(Shader.PropertyToID("_ManorWetness"));
+            float wetness = Shader.GetGlobalFloat(GlobalWetnessId);
             if (Mathf.Abs(wetness - _applied) < 0.005f) return;
             _applied = wetness;
 

@@ -34,7 +34,7 @@ namespace Manor.Editor
             visual.transform.localPosition = new Vector3(0f, 0.875f, 0f);
             visual.transform.localScale = new Vector3(0.58f, 0.875f, 0.58f);
             visual.GetComponent<Renderer>().sharedMaterial = body;
-            Object.DestroyImmediate(visual.GetComponent<Collider>());
+            UnityEngine.Object.DestroyImmediate(visual.GetComponent<Collider>());
 
             // Interaction trigger, so the Interactor's overlap scan can find them.
             var trigger = root.AddComponent<CapsuleCollider>();
@@ -52,7 +52,7 @@ namespace Manor.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-            Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate(root);
             return prefab;
         }
 

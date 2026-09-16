@@ -33,6 +33,9 @@ namespace Manor.Game.NPC
 
         public string DisplayName => definition != null ? definition.displayName : "Local";
 
+        /// <summary>Most recent line spoken. Read by the HUD after an interaction.</summary>
+        public string LastLine { get; private set; } = string.Empty;
+
         /// <summary>Raised with the spoken line when the player talks to this NPC.</summary>
         public event System.Action<NPCController, string> Spoke;
 
@@ -118,7 +121,8 @@ namespace Manor.Game.NPC
             _player = interactor != null ? interactor.transform : null;
             _state = State.Talking;
             _stateTimer = 4f;
-            Spoke?.Invoke(this, NextLine());
+            LastLine = NextLine();
+            Spoke?.Invoke(this, LastLine);
         }
 
         private string NextLine()

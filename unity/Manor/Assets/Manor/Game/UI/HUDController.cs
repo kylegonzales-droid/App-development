@@ -26,37 +26,43 @@ namespace Manor.Game.UI
 
         private GUIStyle _objective, _prompt, _meta, _dialogue, _title, _menuItem;
         private bool _stylesReady;
+        private Manor.Core.Missions.MissionRunner _subscribedRunner;
         private bool _paused;
         private string _dialogueLine = string.Empty;
         private float _dialogueUntil;
 
-        private void OnEnable()
-        {
-            var director = GameDirector.Instance;
-            if (director != null) director.Missions.BeatChanged += OnBeatChanged;
-        }
-
-        private void OnDisable()
-        {
-            var director = GameDirector.Instance;
-            if (director != null) director.Missions.BeatChanged -= OnBeatChanged;
-        }
-
+        // Subscribe in Start, not OnEnable: GameDirector creates the MissionRunner in
+        // Awake, and OnEnable can run before another object's Awake has completed.
         private void Start()
         {
-            foreach (NPCController npc in FindObjectsByType<NPCController>(FindObjectsSortMode.None))
+            GameDirector director = GameDirector.Instance;
+            if (director != null)
             {
-                npc.Spoke += OnNPCSpoke;
+                director.Missions.BeatChanged += OnBeatChanged;
+                _subscribedRunner = director.Missions;
             }
+
+            // Listen to the Interactor rather than to every NPC. NPCs are created by
+            // NPCSpawner.Start(), and the relative order of two Start() calls is
+            // undefined — subscribing to NPCs here would silently find none.
+            if (interactor != null) interactor.Interacted += OnInteracted;
+        }
+
+        private void OnDestroy()
+        {
+            if (_subscribedRunner != null) _subscribedRunner.BeatChanged -= OnBeatChanged;
+            if (interactor != null) interactor.Interacted -= OnInteracted;
+        }
+
+        private void OnInteracted(IInteractable target)
+        {
+            if (target is NPCController npc) ShowDialogue($"{npc.DisplayName}:  {npc.LastLine}", 4.5f);
         }
 
         private void OnBeatChanged(Beat beat)
         {
             if (beat == null) ShowDialogue("Objective complete.", 4f);
         }
-
-        private void OnNPCSpoke(NPCController npc, string line) =>
-            ShowDialogue($"{npc.DisplayName}:  {line}", 4.5f);
 
         private void ShowDialogue(string text, float seconds)
         {

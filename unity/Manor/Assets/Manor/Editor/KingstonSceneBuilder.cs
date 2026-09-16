@@ -325,12 +325,12 @@ namespace Manor.Editor
             Material body = ManorPaths.Material("PlayerBody", new Color(0.16f, 0.18f, 0.22f), 0.2f);
             GameObject capsule = Capsule(player.transform, "Body_Placeholder",
                 new Vector3(0f, 0.9f, 0f), new Vector3(0.62f, 0.9f, 0.62f), body);
-            Object.DestroyImmediate(capsule.GetComponent<Collider>());
+            UnityEngine.Object.DestroyImmediate(capsule.GetComponent<Collider>());
 
             Material bag = ManorPaths.Material("CourierBag", new Color(0.55f, 0.30f, 0.10f), 0.2f);
             GameObject satchel = Box(player.transform, "CourierBag",
                 new Vector3(0f, 1.15f, -0.34f), new Vector3(0.5f, 0.52f, 0.22f), bag);
-            Object.DestroyImmediate(satchel.GetComponent<Collider>());
+            UnityEngine.Object.DestroyImmediate(satchel.GetComponent<Collider>());
 
             return player;
         }
@@ -442,7 +442,7 @@ namespace Manor.Editor
             hso.FindProperty("interactor").objectReferenceValue = player.GetComponent<Interactor>();
             hso.FindProperty("player").objectReferenceValue = player.GetComponent<PlayerController>();
             hso.FindProperty("cameraRig").objectReferenceValue =
-                Object.FindFirstObjectByType<ThirdPersonCamera>();
+                UnityEngine.Object.FindFirstObjectByType<ThirdPersonCamera>();
             hso.ApplyModifiedPropertiesWithoutUndo();
         }
 
